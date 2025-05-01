@@ -55,7 +55,7 @@ func main() {
 
 	handler := NewHandler(tmpl, data)
 
-	http.HandleFunc("/", handler.Redirect)
+	http.HandleFunc("/", handler.ServeChapter)
 
 	fmt.Println(fmt.Sprintf("Server is running: http://localhost:%d", *port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
@@ -93,13 +93,14 @@ func NewHandler(templ *template.Template, data Story) *Handler {
 }
 
 // Redirect handles the root URL and serves the story chapters.
-func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeChapter(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path[1:]
 	if path == "" {
 		path = "intro"
 	}
 	if chapter, ok := h.Data[path]; ok {
-		h.Templ.Execute(w, chapter)
+		err := h.Templ.Execute(w, chapter)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 }
