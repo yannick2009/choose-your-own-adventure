@@ -99,8 +99,9 @@ func (h *Handler) ServeChapter(w http.ResponseWriter, r *http.Request) {
 		path = "intro"
 	}
 	if chapter, ok := h.Data[path]; ok {
-		err := h.Templ.Execute(w, chapter)
-		http.Error(w, err.Error(), http.StatusNotFound)
+		if err := h.Templ.Execute(w, chapter); err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+		}
 		return
 	}
 }
